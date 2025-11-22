@@ -73,4 +73,3 @@ def delete_task_endpoint(task_id: int, session: Session = Depends(get_session)):
     if not ok:
         raise HTTPException(status_code=404, detail="Task not found")
 
-

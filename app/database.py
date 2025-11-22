@@ -1,6 +1,7 @@
+import os
+
 from sqlmodel import create_engine, SQLModel, Session
 from sqlmodel.pool import StaticPool
-import os
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 

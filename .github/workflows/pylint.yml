@@ -26,5 +26,5 @@ jobs:
 
       - name: Run pylint
         run: |
-          echo "Running pylint on the `app` package"
-          pylint app
+          echo "Running pylint on the `app` package and `tests`"
+          pylint app tests --rcfile=.pylintrc

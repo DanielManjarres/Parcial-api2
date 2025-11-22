@@ -1,0 +1,19 @@
+[MASTER]
+ignore=
+jobs=1
+
+[MESSAGES CONTROL]
+# Disable some checks that are often noisy in test and small projects.
+disable=missing-docstring,invalid-name
+
+[FORMAT]
+max-line-length=120
+
+[TYPECHECK]
+ignore-mixin-members=yes
+
+[REPORTS]
+reports=no
+
+[LOGGING]
+logging-modules=logging

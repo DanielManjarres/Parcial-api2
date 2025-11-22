@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+﻿from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 from .database import get_session
 from .models import User, UserCreate, UserUpdate, Task, TaskCreate, TaskUpdate
@@ -38,7 +38,7 @@ def delete_user_endpoint(user_id: int, session: Session = Depends(get_session)):
     ok = services.delete_user(session, user_id)
     if not ok:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
 
 
 @router.post("/tasks/", response_model=Task, status_code=201)
@@ -72,4 +72,6 @@ def delete_task_endpoint(task_id: int, session: Session = Depends(get_session)):
     ok = services.delete_task(session, task_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Task not found")
-    
+
+
+

@@ -26,20 +26,20 @@ jobs:
 
       - name: Run pylint on `app`
         run: |
-          echo "Running pylint on the `app` package"
-          pylint app --rcfile=.pylintrc
+          echo 'Running pylint on the app package'
+          python -m pylint app --rcfile=.pylintrc
 
       - name: Run pylint on `tests/unit`
         run: |
-          echo "Running pylint on tests/unit"
-          pylint tests/unit --rcfile=.pylintrc
+          echo 'Running pylint on tests/unit'
+          python -m pylint tests/unit --rcfile=.pylintrc
 
       - name: Run pylint on `tests/integration`
         run: |
-          echo "Running pylint on tests/integration"
-          pylint tests/integration --rcfile=.pylintrc
+          echo 'Running pylint on tests/integration'
+          python -m pylint tests/integration --rcfile=.pylintrc
 
       - name: Run pylint on `tests/system`
         run: |
-          echo "Running pylint on tests/system"
-          pylint tests/system --rcfile=.pylintrc
+          echo 'Running pylint on tests/system'
+          python -m pylint tests/system --rcfile=.pylintrc

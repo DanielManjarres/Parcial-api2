@@ -3,8 +3,13 @@ from app.main import app
 from app.database import get_session
 from sqlmodel import SQLModel, create_engine, Session
 
-# Base de datos en memoria para pruebas
-test_engine = create_engine("sqlite:///:memory:")
+# Base de datos temporal (NO en memoria)
+test_engine = create_engine(
+    "sqlite:///./test.db",
+    connect_args={"check_same_thread": False}
+)
+
+# Crear tablas para las pruebas
 SQLModel.metadata.create_all(test_engine)
 
 # Sobrescritura de dependencia
@@ -36,7 +41,7 @@ def test_full_flow():
     tasks = resp.json()
     assert any(t["id"] == task_id for t in tasks)
 
-    # 4. Marcar tarea como completada
+    # 4. Marcar tarea completada
     resp = client.patch(f"/tasks/{task_id}", json={"is_completed": True})
     assert resp.status_code == 200
     assert resp.json()["is_completed"] is True
@@ -48,5 +53,3 @@ def test_full_flow():
     # 6. Verificar que ya no existe
     resp = client.get(f"/tasks/{task_id}")
     assert resp.status_code == 404
-
-    print("TEST DE INTEGRACIÓN COMPLETO - 10/10")

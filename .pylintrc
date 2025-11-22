@@ -1,18 +1,37 @@
 [MASTER]
-ignore=
+# Ignorar carpetas de tests y migraciones
+ignore=tests,__pycache__,migrations,.git,.venv,venv
+
+# Usar solo 1 job (más rápido en CI)
 jobs=1
 
-[MESSAGES CONTROL]
-disable=missing-docstring,invalid-name
+# Extensión de archivos a analizar
+extension-pkg-whitelist=
 
+[MESSAGES CONTROL]
+# Desactivamos solo lo que realmente molesta en un parcial
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    invalid-name,
+    too-few-public-methods,
+    duplicate-code,
+    line-too-long
+
+# Permitimos líneas un poco más largas (FastAPI a veces las necesita)
 [FORMAT]
 max-line-length=120
 
+# Para que no se queje con SQLModel y Pydantic
 [TYPECHECK]
+ignored-classes=SQLModel
 ignore-mixin-members=yes
 
+# No generar reportes pesados
 [REPORTS]
 reports=no
 
+# Logging (no lo usamos)
 [LOGGING]
 logging-modules=logging

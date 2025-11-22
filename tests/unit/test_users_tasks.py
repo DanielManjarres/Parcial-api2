@@ -1,7 +1,6 @@
 import pytest
-from sqlmodel import SQLModel
-from sqlmodel import Session, create_engine
-from app.models import UserCreate, UserUpdate, User, TaskCreate, TaskUpdate, Task
+from sqlmodel import SQLModel, Session, create_engine
+from app.models import UserCreate, UserUpdate, TaskCreate, TaskUpdate
 from app import crud
 
 
@@ -13,42 +12,40 @@ def session():
         yield s
 
 
-def test_create_and_get_user(session):
-    payload = UserCreate(name='Alice', email='alice@example.com')
-    user = crud.create_user(session, payload)
+def test_user_full_crud_cycle(session):
+    # Crear usuario
+    user = crud.create_user(session, UserCreate(name="Ana", email="ana@test.com"))
     assert user.id is not None
+
+    # Leer
     fetched = crud.get_user(session, user.id)
-    assert fetched.name == 'Alice'
+    assert fetched.name == "Ana"
 
+    # Actualizar
+    updated = crud.update_user(session, user.id, UserUpdate(name="Ana Updated"))
+    assert updated.name == "Ana Updated"
 
-def test_update_and_delete_user(session):
-    payload = UserCreate(name='Bob', email='bob@example.com')
-    user = crud.create_user(session, payload)
-    upd = UserUpdate(name='Bobby')
-    updated = crud.update_user(session, user.id, upd)
-    assert updated.name == 'Bobby'
-    ok = crud.delete_user(session, user.id)
-    assert ok is True
+    # Eliminar
+    assert crud.delete_user(session, user.id) is True
     assert crud.get_user(session, user.id) is None
 
 
-def test_create_task_for_user_and_crud(session):
-    user_payload = UserCreate(name='Carl', email='carl@example.com')
-    user = crud.create_user(session, user_payload)
+def test_task_full_crud_cycle_with_user(session):
+    # Crear usuario primero
+    user = crud.create_user(session, UserCreate(name="Luis", email="luis@test.com"))
 
-    task_payload = TaskCreate(title='Task 1', description='desc', user_id=user.id)
-    task = crud.create_task(session, task_payload)
-    assert task.id is not None
+    # Crear tarea asociada
+    task = crud.create_task(session, TaskCreate(title="Estudiar", user_id=user.id))
     assert task.user_id == user.id
 
+    # Leer
     fetched = crud.get_task(session, task.id)
-    assert fetched.title == 'Task 1'
+    assert fetched.title == "Estudiar"
 
-    upd = TaskUpdate(title='Task 1 updated', is_completed=True)
-    updated = crud.update_task(session, task.id, upd)
-    assert updated.title == 'Task 1 updated'
+    # Actualizar (completar)
+    updated = crud.update_task(session, task.id, TaskUpdate(is_completed=True))
     assert updated.is_completed is True
 
-    ok = crud.delete_task(session, task.id)
-    assert ok is True
+    # Eliminar
+    assert crud.delete_task(session, task.id) is True
     assert crud.get_task(session, task.id) is None

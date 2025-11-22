@@ -2,6 +2,7 @@ from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 
 
+# ==================== TABLAS ====================
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
@@ -18,6 +19,7 @@ class Task(SQLModel, table=True):
     user: Optional[User] = Relationship(back_populates="tasks")
 
 
+# ==================== DTOs (para entrada/salida) ====================
 class UserCreate(SQLModel):
     name: str
     email: str
@@ -32,11 +34,11 @@ class TaskCreate(SQLModel):
     title: str
     description: Optional[str] = None
     is_completed: bool = False
-    user_id: Optional[int] = None
+    user_id: int  # Obligatorio para que no haya tareas huérfanas
 
 
 class TaskUpdate(SQLModel):
     title: Optional[str] = None
     description: Optional[str] = None
     is_completed: Optional[bool] = None
-    user_id: Optional[int] = None
+    

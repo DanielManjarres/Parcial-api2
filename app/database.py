@@ -1,15 +1,6 @@
-import os
-
 from sqlmodel import create_engine, SQLModel, Session
-from sqlmodel.pool import StaticPool
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
-
-
-if DATABASE_URL == "sqlite:///:memory:":
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool)
-else:
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine("sqlite:///./todo.db", echo=False)
 
 def init_db():
     SQLModel.metadata.create_all(engine)
@@ -17,3 +8,4 @@ def init_db():
 def get_session():
     with Session(engine) as session:
         yield session
+        

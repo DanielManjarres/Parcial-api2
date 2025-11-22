@@ -1,68 +1,79 @@
 import pytest
-from sqlmodel import SQLModel
-from sqlmodel import Session, create_engine
-from app.models import (
-    UserCreate,
-    UserUpdate,
-    TaskCreate,
-    TaskUpdate,
-)
+from sqlmodel import SQLModel, Session, create_engine
+from app.models import UserCreate, UserUpdate, TaskCreate, TaskUpdate
 from app import crud
 
 
-@pytest.fixture
-def session():
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+@pytest.fixture(name="session")
+def session_fixture():
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False}
+    )
     SQLModel.metadata.create_all(engine)
-    with Session(engine) as s:
-        yield s
+    with Session(engine) as session:
+        yield session
+    # Se cierra automáticamente al salir del bloque
 
 
-def test_user_crud(session):
-   
-    payload = UserCreate(name='Alice', email='alice@example.com')
+def test_user_crud_full_cycle(session: Session):
+    # CREATE
+    payload = UserCreate(name="Alice", email="alice@example.com")
     user = crud.create_user(session, payload)
     assert user.id is not None
+    assert user.name == "Alice"
+    assert user.email == "alice@example.com"
 
-  
+    # READ
     fetched = crud.get_user(session, user.id)
-    assert fetched is not None
-    assert fetched.name == 'Alice'
+    assert fetched == user
 
-    upd = UserUpdate(name='Alice Updated')
-    updated = crud.update_user(session, user.id, upd)
-    assert updated is not None
-    assert updated.name == 'Alice Updated'
+    # UPDATE
+    update_payload = UserUpdate(name="Alice Updated", email="new@mail.com")
+    updated = crud.update_user(session, user.id, update_payload)
+    assert updated.name == "Alice Updated"
+    assert updated.email == "new@mail.com"
 
-    users = crud.list_users(session)
-    assert any(u.id == user.id for u in users)
+    # LIST
+    all_users = crud.list_users(session)
+    assert len(all_users) == 1
+    assert all_users[0].id == user.id
 
-    ok = crud.delete_user(session, user.id)
-    assert ok is True
+    # DELETE
+    deleted = crud.delete_user(session, user.id)
+    assert deleted is True
     assert crud.get_user(session, user.id) is None
 
 
-def test_task_crud(session):
-    user = crud.create_user(session, UserCreate(name='Bob', email='bob@example.com'))
+def test_task_crud_full_cycle(session: Session):
+    # Primero creamos un usuario
+    user = crud.create_user(session, UserCreate(name="Bob", email="bob@test.com"))
+    user_id = user.id
 
-    task_payload = TaskCreate(title='Task 1', description='desc', user_id=user.id)
-    task = crud.create_task(session, task_payload)
+    # CREATE Task
+    task_data = TaskCreate(title="Hacer el parcial", user_id=user_id)
+    task = crud.create_task(session, task_data)
     assert task.id is not None
-    assert task.user_id == user.id
+    assert task.title == "Hacer el parcial"
+    assert task.user_id == user_id
+    assert task.is_completed is False
 
+    # READ
     fetched = crud.get_task(session, task.id)
-    assert fetched is not None
-    assert fetched.title == 'Task 1'
+    assert fetched == task
 
-    upd = TaskUpdate(title='Task 1 updated', is_completed=True)
-    updated = crud.update_task(session, task.id, upd)
-    assert updated is not None
-    assert updated.title == 'Task 1 updated'
-    assert updated.is_completed is True
+    # UPDATE
+    update_data = TaskUpdate(is_completed=True, title="Parcial hecho!")
+    updated_task = crud.update_task(session, task.id, update_data)
+    assert updated_task.is_completed is True
+    assert updated_task.title == "Parcial hecho!"
 
+    # LIST
     tasks = crud.list_tasks(session)
-    assert any(t.id == task.id for t in tasks)
+    assert len(tasks) == 1
+    assert tasks[0].is_completed is True
 
-    ok = crud.delete_task(session, task.id)
-    assert ok is True
+    # DELETE
+    deleted = crud.delete_task(session, task.id)
+    assert deleted is True
     assert crud.get_task(session, task.id) is None
